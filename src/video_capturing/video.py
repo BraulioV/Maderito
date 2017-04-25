@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 ################################################################################
 #                       Sistemas con Microprocesadores                         #
 #    Script opencv+python para leer imágenes de un eye toy con raspberry pi    #
@@ -21,7 +23,7 @@ while(True):
     gray1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
 
     # Display the resulting frame
-    cv2.imshow('Camera 0',gray2)
+    cv2.imshow('Camera 0',gray0)
     cv2.imshow('Camera 1',gray1)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
