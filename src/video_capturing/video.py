@@ -8,17 +8,21 @@
 import numpy as np
 import cv2
 
-cap = cv2.VideoCapture(1)
+cap0 = cv2.VideoCapture(0)
+cap1 = cv2.VideoCapture(1)
 
 while(True):
     # Capture frame-by-frame
-    ret, frame = cap.read()
+    ret0, frame0 = cap0.read()
+    ret1, frame1 = cap1.read()
 
     # Our operations on the frame come here
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray0 = cv2.cvtColor(frame0, cv2.COLOR_BGR2GRAY)
+    gray1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
 
     # Display the resulting frame
-    cv2.imshow('frame',gray)
+    cv2.imshow('Camera 0',gray2)
+    cv2.imshow('Camera 1',gray1)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
