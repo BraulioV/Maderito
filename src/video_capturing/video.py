@@ -12,7 +12,7 @@ import cv2
 
 cap0 = cv2.VideoCapture(1)
 cap1 = cv2.VideoCapture(2)
-ffdetector = cv2.FastFeatureDetector_create()
+ffdetector = cv2.xfeatures2d.SURF_create()
 
 while(True):
     # Capture frame-by-frame
