@@ -24,18 +24,13 @@ void setup() {
   pinMode (IN4, OUTPUT);
   pinMode (ENA, OUTPUT);
   pinMode (ENB, OUTPUT);
-  //pinMode (SLA, INPUT);
+  pinMode (SLA, INPUT);
   pinMode (SLB, INPUT);
-  // put your setup code here, to run once:
   Serial.begin(9600); 
 
 }
 
 void loop() {
-
-  //sensorValA = digitalRead(SLA); //Guardamos la lectura del pin Analógico
-  //sensorValB = digitalRead(SLB);
-
   analogWrite(ENA, 255);
   analogWrite(ENB, 255); 
 
@@ -46,9 +41,10 @@ void loop() {
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, HIGH);
  
-  sensorValB = digitalRead(SLB); 
-  // put your main code here, to run repeatedly:
+  sensorValB = digitalRead(SLB);
+  sensorValA = digitalRead(SLA);
 
-  Serial.println(sensorValB); //Sacamos la lectura por serial
+  Serial.println(sensorValB);
+  Serial.println(sensorValA);
 
 }
