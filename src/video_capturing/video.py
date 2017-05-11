@@ -26,8 +26,8 @@ while(True):
 
     prev_PyVR, next_PyVR = np.zeros(gray_prev.shape, dtype=np.uint8), np.zeros(gray_prev.shape, dtype=np.uint8)
     
-    curr_points, status, err = cv2.CalcOpticalFlowPyrLK(gray_prev, gray_next, 
-                                                                                prev_PyVR, next_PyVR,  corners, (10,10), 3 , (cv.CV_TERMCRIT_ITER|cv.CV_TERMCRIT_EPS,20, 0.03), 0)
+    curr_points, status, err = cv2.calcOpticalFlowPyrLK(gray_prev, gray_next, 
+                                                                                prev_PyVR, next_PyVR,  corners, (10,10), 3 , (cv2.TERM_CRITERIA_MAX_ITER|cv2.TERM_CRITERIA_EPS,20, 0.03), 0)
     # keypoints0 = ffdetector.detect(image=gray_prev, mask=None)
     # keypoints1 = ffdetector.detect(image=gray_next, mask=None)
 
