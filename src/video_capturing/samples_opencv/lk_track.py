@@ -67,6 +67,9 @@ class App:
                     new_tracks.append(tr)
                     cv2.circle(vis, (x, y), 2, (0, 255, 0), -1)
                 self.tracks = new_tracks
+                # print("=======================================================")
+                # print(self.tracks)
+                # print("=======================================================")
                 cv2.polylines(vis, [np.int32(tr) for tr in self.tracks], False, (0, 255, 0))
                 draw_str(vis, (20, 20), 'track count: %d' % len(self.tracks))
 
