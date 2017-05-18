@@ -1,111 +1,95 @@
-#!/usr/bin/python
-import urllib
-import sys
-import time
-from math import cos, sin
+#!/usr/bin/env python
 import numpy as np
-import cv2 as cv
+import cv2
 
-CLOCKS_PER_SEC = 1.0
-MHI_DURATION = 1
-MAX_TIME_DELTA = 0.5
+MHI_DURATION = 0.5
+DEFAULT_THRESHOLD = 32
+MAX_TIME_DELTA = 0.25
 MIN_TIME_DELTA = 0.05
-N = 4
-buf = range(10)
-last = 0
-mhi = None # MHI
-orient = None # orientation
-mask = None # valid orientation mask
-segmask = None # motion segmentation map
-storage = None # temporary storage
 
-def update_mhi(img, dst, diff_threshold):
-    global last
-    global mhi
-    global storage
-    global mask
-    global orient
-    global segmask
-    timestamp = time.clock() / CLOCKS_PER_SEC # get current time in seconds
-    size = cv.getSize(img) # get current frame size
-    idx1 = last
-    if not mhi or cv.getSize(mhi) != size:
-        for i in range(N):
-            buf[i] = cv.createImage(size, cv.IPL_DEPTH_8U, 1)
-            buff[i] = np.zeros(size)
-        mhi = cv.CreateImage(size,cv. IPL_DEPTH_32F, 1)
-        cv.Zero(mhi) # clear MHI at the beginning
-        orient = cv.CreateImage(size,cv. IPL_DEPTH_32F, 1)
-        segmask = cv.CreateImage(size,cv. IPL_DEPTH_32F, 1)
-        mask = cv.CreateImage(size,cv. IPL_DEPTH_8U, 1)
+# (empty) trackbar callback
+def nothing(dummy):
+    pass
 
-    cv.CvtColor(img, buf[last], cv.CV_BGR2GRAY) # convert frame to grayscale
-    idx2 = (last + 1) % N # index of (last - (N-1))th frame
-    last = idx2
-    silh = buf[idx2]
-    cv.AbsDiff(buf[idx1], buf[idx2], silh) # get difference between frames
-    cv.Threshold(silh, silh, diff_threshold, 1, cv.CV_THRESH_BINARY) # and threshold it
-    cv.UpdateMotionHistory(silh, mhi, timestamp, MHI_DURATION) # update MHI
-    cv.CvtScale(mhi, mask, 255./MHI_DURATION,
-                (MHI_DURATION - timestamp)*255./MHI_DURATION)
-    cv.Zero(dst)
-    cv.Merge(mask, None, None, None, dst)
-    cv.CalcMotionGradient(mhi, mask, orient, MAX_TIME_DELTA, MIN_TIME_DELTA, 3)
-    if not storage:
-        storage = cv.CreateMemStorage(0)
-    seq = cv.SegmentMotion(mhi, segmask, storage, timestamp, MAX_TIME_DELTA)
-    for (area, value, comp_rect) in seq:
-        if comp_rect[2] + comp_rect[3] > 100: # reject very small components
-            color = cv.CV_RGB(255, 0,0)
-            silh_roi = cv.GetSubRect(silh, comp_rect)
-            mhi_roi = cv.GetSubRect(mhi, comp_rect)
-            orient_roi = cv.GetSubRect(orient, comp_rect)
-            mask_roi = cv.GetSubRect(mask, comp_rect)
-            angle = 360 - cv.CalcGlobalOrientation(orient_roi, mask_roi, mhi_roi, timestamp, MHI_DURATION)
+def draw_motion_comp(vis, lista, angle, color):
+    x,y,w,h = lista
+    cv2.rectangle(vis, (x, y), (x+w, y+h), (0, 255, 0))
+    r = min(w/2, h/2)
+    cx, cy = x+w/2, y+h/2
+    angle = angle*np.pi/180
+    cv2.circle(vis, (int(cx), int(cy)), int(r), color, 3)
+    cv2.line(vis, (int(cx), int(cy)), (int(cx+np.cos(angle)*r), int(cy+np.sin(angle)*r)), color, 3)
 
-            count = cv.Norm(silh_roi, None, cv.CV_L1, None) # calculate number of points within silhouette ROI
-            if count < (comp_rect[2] * comp_rect[3] * 0.05):
-                continue
+if __name__ == '__main__':
+    import sys
+    try:
+        video_src = sys.argv[1]
+    except:
+        video_src = 1
 
-            magnitude = 30.
-            center = ((comp_rect[0] + comp_rect[2] / 2), (comp_rect[1] + comp_rect[3] / 2))
-            cv.Circle(dst, center, cv.Round(magnitude*1.2), color, 3, cv.CV_AA, 0)
-            cv.Line(dst,
-                    center,
-                    (cv.Round(center[0] + magnitude * cos(angle * cv.CV_PI / 180)),
-                     cv.Round(center[1] - magnitude * sin(angle * cv.CV_PI / 180))),
-                    color,
-                    3,
-                    cv.CV_AA,
-                    0)
+    cv2.namedWindow('motempl')
+    visuals = ['input', 'frame_diff', 'motion_hist', 'grad_orient']
+    cv2.createTrackbar('visual', 'motempl', 2, len(visuals)-1, nothing)
+    cv2.createTrackbar('threshold', 'motempl', DEFAULT_THRESHOLD, 255, nothing)
 
-if __name__ == "__main__":
-    motion = 0
-    capture = 0
-
-    if len(sys.argv)==1:
-        capture = cv.createCameraCapture(0)
-    elif len(sys.argv)==2 and sys.argv[1].isdigit():
-        capture = cv.createCameraCapture(int(sys.argv[1]))
-    elif len(sys.argv)==2:
-        capture = cv.createFileCapture(sys.argv[1])
-
-    if not capture:
-        print("Could not initialize capturing...")
-        sys.exit(-1)
-
-    cv.NamedWindow("Motion", 1)
+    cam = cv2.VideoCapture(video_src)
+    if not cam.isOpened():
+        print("could not open video_src " + str(video_src) + " !\n")
+        sys.exit(1)
+    ret, frame = cam.read()
+    if ret == False:
+        print("could not read from " + str(video_src) + " !\n")
+        sys.exit(1)
+    h, w = frame.shape[:2]
+    prev_frame = frame.copy()
+    motion_history = np.zeros((h, w), np.float32)
+    hsv = np.zeros((h, w, 3), np.uint8)
+    hsv[:,:,1] = 255
     while True:
-        image = cv.QueryFrame(capture)
-        if(image):
-            if(not motion):
-                    motion = cv.createImage((image.width, image.height), 8, 3)
-                    cv.Zero(motion)
-                    #motion.origin = image.origin
-            update_mhi(image, motion, 30)
-            cv.ShowImage("Motion", motion)
-            if(cv.WaitKey(10) != -1):
-                break
-        else:
+        ret, frame = cam.read()
+        if ret == False:
             break
-    cv.DestroyWindow("Motion")
+        frame_diff = cv2.absdiff(frame, prev_frame)
+        gray_diff = cv2.cvtColor(frame_diff, cv2.COLOR_BGR2GRAY)
+        thrs = cv2.getTrackbarPos('threshold', 'motempl')
+        ret, motion_mask = cv2.threshold(gray_diff, thrs, 1, cv2.THRESH_BINARY)
+        timestamp = cv2.getTickCount() / cv2.getTickFrequency()
+        cv2.motempl.updateMotionHistory(motion_mask, motion_history, timestamp, MHI_DURATION)
+        mg_mask, mg_orient = cv2.motempl.calcMotionGradient( motion_history, MAX_TIME_DELTA, MIN_TIME_DELTA, apertureSize=5 )
+        seg_mask, seg_bounds = cv2.motempl.segmentMotion(motion_history, timestamp, MAX_TIME_DELTA)
+
+        visual_name = visuals[cv2.getTrackbarPos('visual', 'motempl')]
+        if visual_name == 'input':
+            vis = frame.copy()
+        elif visual_name == 'frame_diff':
+            vis = frame_diff.copy()
+        elif visual_name == 'motion_hist':
+            vis = np.uint8(np.clip((motion_history-(timestamp-MHI_DURATION)) / MHI_DURATION, 0, 1)*255)
+            vis = cv2.cvtColor(vis, cv2.COLOR_GRAY2BGR)
+        elif visual_name == 'grad_orient':
+            hsv[:,:,0] = mg_orient/2
+            hsv[:,:,2] = mg_mask*255
+            vis = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+
+        for i, rect in enumerate([(0, 0, w, h)] + list(seg_bounds)):
+            x, y, rw, rh = rect
+            area = rw*rh
+            if area < 64**2:
+                continue
+            silh_roi   = motion_mask   [y:y+rh,x:x+rw]
+            orient_roi = mg_orient     [y:y+rh,x:x+rw]
+            mask_roi   = mg_mask       [y:y+rh,x:x+rw]
+            mhi_roi    = motion_history[y:y+rh,x:x+rw]
+            if cv2.norm(silh_roi, cv2.NORM_L1) < area*0.05:
+                continue
+            angle = cv2.motempl.calcGlobalOrientation(orient_roi, mask_roi, mhi_roi, timestamp, MHI_DURATION)
+            color = ((255, 0, 0), (0, 0, 255))[i == 0]
+            draw_motion_comp(vis, rect, angle, color)
+
+        cv2.putText(vis, visual_name, (20, 20), cv2.FONT_HERSHEY_PLAIN, 1.0, (200,0,0))
+        cv2.imshow('motempl', vis)
+
+        prev_frame = frame.copy()
+        if 0xFF & cv2.waitKey(5) == 27:
+            break
+cv2.destroyAllWindows()
