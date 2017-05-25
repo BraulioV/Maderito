@@ -8,6 +8,9 @@ const int IN4 = 7;
 const int ENA = 9;
 const int ENB = 3;
 
+//distancia
+int pirPin = A2;
+
 //siguelinea
 
 
@@ -57,7 +60,7 @@ void loop() {
   Serial.println(sensorValD);
 
   
-  if( sernsorValA == 0) //linea negra delante derehca
+  if( sernsorValA == 0 || sensorValB == 0) //linea negra delante derehca
   {
       //mover maderito hacia atrás
       digitalWrite(IN1, HIGH);
@@ -65,41 +68,25 @@ void loop() {
       digitalWrite(IN3, LOW);
       digitalWrite(IN4, HIGH);
   }
-  if( sensorValB == 0) //línea negra detrás izquierda
+  else if( sensorValC == 0 || sensorValD == 0)
   {
-      //mover maderito hacia atrás
-      digitalWrite(IN1, HIGH);
-      digitalWrite(IN2, LOW);
-      digitalWrite(IN3, LOW);
-      digitalWrite(IN4, HIGH);
-  }
-  if( sensorValC == 0) //línea negra detrás derecha
-  {
-      //mover maderito hacia delante
-      digitalWrite(IN1, LOW);
-      digitalWrite(IN2, HIGH);
-      digitalWrite(IN3, HIGH);
-      digitalWrite(IN4, LOW);
-  }
-  if( sensorValD == 0) //línea negra detrás izquierda
-  {
-      //mover maderito hacia delante
-      digitalWrite(IN1, LOW);
-      digitalWrite(IN2, HIGH);
-      digitalWrite(IN3, HIGH);
-      digitalWrite(IN4, LOW);
-  }
-  
-    //girar a la derecha
-  digitalWrite(IN1, HIGH);
-  digitalWrite(IN2, LOW);
-  digitalWrite(IN3, HIGH);
-  digitalWrite(IN4, LOW);
+        //mover maderito hacia delante
+        digitalWrite(IN1, LOW);
+        digitalWrite(IN2, HIGH);
+        digitalWrite(IN3, HIGH);
+        digitalWrite(IN4, LOW);
+   }
 
-  //girar a la izquierda
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, HIGH);
-  digitalWrite(IN3, LOW);
-  digitalWrite(IN4, HIGH);
+  if( digitalRead(pirPin) == HIGH )
+  {
+      analogWrite(ENA, 255);
+      analogWrite(ENB, 255); 
+  }
+  else if( digitalRead(pirPin) == LOW )
+  {
+      analogWrite(ENA, 155);
+      analogWrite(ENB, 155);  
+  }
+
   
 }
