@@ -32,6 +32,14 @@ while(1):
     # calculate optical flow
     p1, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, p0, None, **lk_params)
 
+    diff = p0 - p1
+    if diff[0,0,0] > 10:
+        print("girando hacia la izquierda")
+    elif diff[0,0,0] < -10:
+        print("girando hacia la derecha")
+    else:
+        print("quieto")
+
     # Select good points
     if (p1 != None and p0 != None) : 
         good_new = p1[st==1]
