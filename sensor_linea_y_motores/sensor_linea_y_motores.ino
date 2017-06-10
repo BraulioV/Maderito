@@ -21,7 +21,9 @@ const int SLA_2 = 10;
 const int SLB_2 = 11;
 const int SLA = 12;
 const int SLB = 13;
-int sensorValA, sensorValB, sensorValC, sensorValD;
+
+int sensorValA, sensorValB, 
+    sensorValC, sensorValD;
 
 void avanzar(){
     digitalWrite(IN1, LOW);
@@ -35,6 +37,25 @@ void retroceder(){
     digitalWrite(IN2, LOW);
     digitalWrite(IN3, LOW);
     digitalWrite(IN4, HIGH);
+}
+
+void girar_izquierda(){
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, HIGH);
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, HIGH);
+}
+
+void girar_derecha(){
+    digitalWrite(IN1, HIGH);
+    digitalWrite(IN2, LOW);
+    digitalWrite(IN3, HIGH);
+    digitalWrite(IN4, LOW);
+}
+
+void cambia_velocidad(v){
+  analogWrite(ENA, v); 
+  analogWrite(ENB, v); 
 }
 
 void setup() {
@@ -54,8 +75,7 @@ void setup() {
 }
 
 void loop() {
-    /*analogWrite(ENA, 60);
-    analogWrite(ENB, 60); 
+    /*
     
     //high para delante y low para atrás
     //variables de los siguelinea
@@ -97,19 +117,8 @@ void loop() {
     int cm = ping(TriggerPin, EchoPin);
     Serial.println(cm);
     delay(200);
-    /*
-    
-    //girar a la derecha
-    digitalWrite(IN1, HIGH);
-    digitalWrite(IN2, LOW);
-    digitalWrite(IN3, HIGH);
-    digitalWrite(IN4, LOW);
-    
-    //girar a la izquierda
-    digitalWrite(IN1, LOW);
-    digitalWrite(IN2, HIGH);
-    digitalWrite(IN3, LOW);
-    digitalWrite(IN4, HIGH);
+
+
     
     */
     
