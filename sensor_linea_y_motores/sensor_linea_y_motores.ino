@@ -53,9 +53,40 @@ void girar_derecha(){
     digitalWrite(IN4, LOW);
 }
 
-void cambia_velocidad(v){
+void cambia_velocidad(int v){
   analogWrite(ENA, v); 
   analogWrite(ENB, v); 
+}
+
+// mide la distancia que hay entre nosotros y el
+// robot enemigo usando el sensor de distancia
+int ping(int TriggerPin, int EchoPin) {
+   long duration, distanceCm;
+   
+   digitalWrite(TriggerPin, LOW);  //para generar un pulso limpio ponemos a LOW 4us
+   delayMicroseconds(4);
+   digitalWrite(TriggerPin, HIGH);  //generamos Trigger (disparo) de 10us
+   delayMicroseconds(10);
+   digitalWrite(TriggerPin, LOW);
+   
+   duration = pulseIn(EchoPin, HIGH);  //medimos el tiempo entre pulsos, en microsegundos
+   
+   distanceCm = duration * 10 / 292/ 2;   //convertimos a distancia, en cm
+   return distanceCm;
+}
+
+void escapar(){
+  Serial.println("Girando");
+  delay(20);
+  girar_izquierda();
+  delay(500);
+  Serial.println("Retrocediendo");
+  cambia_velocidad(255);
+  delay(20);
+  retroceder();
+  Serial.println("Acelerando");
+  delay(100);
+  cambia_velocidad(0);
 }
 
 void setup() {
@@ -72,9 +103,13 @@ void setup() {
     pinMode(TriggerPin, OUTPUT);
     pinMode(EchoPin, INPUT);
     Serial.begin(9600); 
+    cambia_velocidad(127);
+    avanzar();
+
 }
 
 void loop() {
+ 
     /*
     
     //high para delante y low para atrás
@@ -117,25 +152,7 @@ void loop() {
     int cm = ping(TriggerPin, EchoPin);
     Serial.println(cm);
     delay(200);
-
-
-    
-    */
-    
-
+    if (cm < 15) escapar();
 }
 
-int ping(int TriggerPin, int EchoPin) {
-   long duration, distanceCm;
-   
-   digitalWrite(TriggerPin, LOW);  //para generar un pulso limpio ponemos a LOW 4us
-   delayMicroseconds(4);
-   digitalWrite(TriggerPin, HIGH);  //generamos Trigger (disparo) de 10us
-   delayMicroseconds(10);
-   digitalWrite(TriggerPin, LOW);
-   
-   duration = pulseIn(EchoPin, HIGH);  //medimos el tiempo entre pulsos, en microsegundos
-   
-   distanceCm = duration * 10 / 292/ 2;   //convertimos a distancia, en cm
-   return distanceCm;
-}
+
