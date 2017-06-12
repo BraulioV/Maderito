@@ -1,31 +1,8 @@
 import numpy as np
 import cv2
+import serial
 
-cap = cv2.VideoCapture(0)
-
-# params for ShiTomasi corner detection
-feature_params = dict( maxCorners = 500,
-                       qualityLevel = 0.3,
-                       minDistance = 7,
-                       blockSize = 7 )
-
-# Parameters for lucas kanade optical flow
-lk_params = dict( winSize  = (15,15),
-                  maxLevel = 2,
-                  criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
-
-# Create some random colors
-color = np.random.randint(0,255,(100,3))
-
-# Take first frame and find corners in it
-ret, old_frame = cap.read()
-old_gray = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
-p0 = cv2.goodFeaturesToTrack(old_gray, mask = None, **feature_params)
-
-# Create a mask image for drawing purposes
-mask = np.zeros_like(old_frame)
-
-while(1):
+def track_object(p0):
     ret,frame = cap.read()
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -57,11 +34,52 @@ while(1):
     cv2.imshow('frame',img)
     k = cv2.waitKey(30) & 0xff
     if k == 27:
-        break
+        return 1
 
     # Now update the previous frame and previous points
     old_gray = frame_gray.copy()
     p0 = good_new.reshape(-1,1,2)
+    
+def detect_object():
+    # Take first frame and find corners in it
+    ret, old_frame = cap.read()
+    old_gray = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
+    p0 = cv2.goodFeaturesToTrack(old_gray, mask = None, **feature_params)
+    return p0
+    
+
+cap = cv2.VideoCapture(1)
+ser = serial.Serial('dev/ttyACM0', 9600)
+
+# params for ShiTomasi corner detection
+feature_params = dict( maxCorners = 500,
+                       qualityLevel = 0.3,
+                       minDistance = 7,
+                       blockSize = 7 )
+
+# Parameters for lucas kanade optical flow
+lk_params = dict( winSize  = (15,15),
+                  maxLevel = 2,
+                  criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
+
+# Create some random colors
+color = np.random.randint(0,255,(100,3))
+
+
+# Create a mask image for drawing purposes
+mask = np.zeros_like(old_frame)
+
+p0 = detect_object()
+
+while(1):
+    state = ser.read()
+
+    # the robot is not moving
+    if state != 'm':
+        track_object(p0)
+    else:
+        if state == 's':
+            p0 = detect_object()
     
 
 cv2.destroyAllWindows()
