@@ -89,6 +89,45 @@ void escapar(){
   cambia_velocidad(60);
 }
 
+void reconoce_linea_negra() {
+  //variables de los siguelinea
+  sensorValA = digitalRead(SLA);
+  sensorValB = digitalRead(SLB);
+  sensorValC = digitalRead(SLB_2);
+  sensorValD = digitalRead(SLA_2);
+  
+  /*
+  //muestra por serial de los valores (0 o 1)
+  Serial.println("Sensor A: " + sensorValA);
+  Serial.println("Sensor B: " + sensorValB);
+  Serial.println("Sensor C: " + sensorValC);
+  Serial.println("Sensor D: " + sensorValD);
+  */
+  
+  if( sensorValC == 0 || sensorValD == 0 ) //linea negra delante derehca
+  {   
+    avanza = false;
+    //mover maderito hacia atrás
+    retroceder();
+    delay(100);
+  }
+  else if( sensorValA == 0 || sensorValB == 0 )
+  {
+      avanza = true;
+      //mover maderito hacia delante
+      avanzar();
+      delay(100);
+  } 
+  else {
+    if (avanza){
+      avanzar();
+    }
+    else{
+      retroceder();
+    }
+  } 
+}
+
 void setup() {
     pinMode (IN1, OUTPUT);
     pinMode (IN2, OUTPUT);
@@ -109,49 +148,19 @@ void setup() {
 }
 
 void loop() {
-    /*
-    //high para delante y low para atrás
-    //variables de los siguelinea
-    sensorValA = digitalRead(SLA);
-    sensorValB = digitalRead(SLB);
-    sensorValC = digitalRead(SLB_2);
-    sensorValD = digitalRead(SLA_2);
-    
-    //muestra por serial de los valores (0 o 1)
-    Serial.println("Sensor A: ");
-    Serial.println(sensorValA);
-    Serial.println("Sensor B: " + sensorValB);
-    Serial.println("Sensor C: " + sensorValC);
-    Serial.println("Sensor D: " + sensorValD);
-    
-    
-    if( sensorValC == 0 || sensorValD == 0 ) //linea negra delante derehca
-    {   
-      avanza = false;
-      //mover maderito hacia atrás
-      retroceder();
-      delay(100);
+    // el serial debe estar disponible para comunicarse con la pi
+    if (Serial.available() > 0) {
+      // comprobamos que el robot no va a salirse de la línea negra
+      reconoce_linea_negra();
+
+      // medimos distancia con el sensor de distancia
+      int cm = ping(TriggerPin, EchoPin);
+      Serial.println(cm);
+      delay(200);
+
+      if (cm < 15) escapar();
+      //else avanzar();
     }
-    else if( sensorValA == 0 || sensorValB == 0 )
-    {
-        avanza = true;
-        //mover maderito hacia delante
-        avanzar();
-        delay(100);
-    } 
-    else {
-      if (avanza){
-        avanzar();
-      }
-      else{
-        retroceder();
-      }
-    } */
-    int cm = ping(TriggerPin, EchoPin);
-    Serial.println(cm);
-    delay(200);
-    if (cm < 15) escapar();
-    //else avanzar();
 }
 
 
