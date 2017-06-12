@@ -76,17 +76,17 @@ int ping(int TriggerPin, int EchoPin) {
 }
 
 void escapar(){
-  Serial.println("Girando");
+  cambia_velocidad(0);
   delay(20);
   girar_izquierda();
-  delay(500);
-  Serial.println("Retrocediendo");
   cambia_velocidad(255);
+  delay(600);
+  cambia_velocidad(0);
   delay(20);
   retroceder();
-  Serial.println("Acelerando");
+  cambia_velocidad(100);
   delay(100);
-  cambia_velocidad(0);
+  cambia_velocidad(60);
 }
 
 void setup() {
@@ -103,15 +103,13 @@ void setup() {
     pinMode(TriggerPin, OUTPUT);
     pinMode(EchoPin, INPUT);
     Serial.begin(9600); 
-    cambia_velocidad(127);
+    cambia_velocidad(60);
     avanzar();
 
 }
 
 void loop() {
- 
     /*
-    
     //high para delante y low para atrás
     //variables de los siguelinea
     sensorValA = digitalRead(SLA);
@@ -148,11 +146,12 @@ void loop() {
       else{
         retroceder();
       }
-    }*/
+    } */
     int cm = ping(TriggerPin, EchoPin);
     Serial.println(cm);
     delay(200);
     if (cm < 15) escapar();
+    //else avanzar();
 }
 
 
