@@ -2,7 +2,29 @@ import numpy as np
 import cv2
 import serial
 
-def track_object(p0):
+cap = cv2.VideoCapture(1)
+# ser = serial.Serial('dev/ttyACM0', 9600)
+
+# params for ShiTomasi corner detection
+feature_params = dict( maxCorners = 500,
+                       qualityLevel = 0.3,
+                       minDistance = 7,
+                       blockSize = 7 )
+
+# Parameters for lucas kanade optical flow
+lk_params = dict( winSize  = (15,15),
+                  maxLevel = 2,
+                  criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
+
+# Create some random colors
+color = np.random.randint(0,255,(100,3))
+
+
+# Create a mask image for drawing purposes
+ret, old_frame = cap.read()
+mask = np.zeros_like(old_frame)
+
+def track_object(p0, old_gray, mask):
     ret,frame = cap.read()
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -12,10 +34,13 @@ def track_object(p0):
     diff = p0 - p1
     if diff[0,0,0] > 10:
         print("girando hacia la izquierda")
+        # ser.write('l'.encode())
     elif diff[0,0,0] < -10:
         print("girando hacia la derecha")
+        # ser.write('r'.encode())
     else:
         print("quieto")
+        # ser.write('q'.encode())
 
     # Select good points
     if (p1 != None and p0 != None) : 
@@ -45,38 +70,17 @@ def detect_object():
     ret, old_frame = cap.read()
     old_gray = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
     p0 = cv2.goodFeaturesToTrack(old_gray, mask = None, **feature_params)
-    return p0
-    
-
-cap = cv2.VideoCapture(1)
-ser = serial.Serial('dev/ttyACM0', 9600)
-
-# params for ShiTomasi corner detection
-feature_params = dict( maxCorners = 500,
-                       qualityLevel = 0.3,
-                       minDistance = 7,
-                       blockSize = 7 )
-
-# Parameters for lucas kanade optical flow
-lk_params = dict( winSize  = (15,15),
-                  maxLevel = 2,
-                  criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
-
-# Create some random colors
-color = np.random.randint(0,255,(100,3))
+    return p0, old_gray
 
 
-# Create a mask image for drawing purposes
-mask = np.zeros_like(old_frame)
-
-p0 = detect_object()
+p0, old_gray = detect_object()
 
 while(1):
-    state = ser.read()
-
+    # state = ser.read()
+    state = 'l'
     # the robot is not moving
     if state != 'm':
-        track_object(p0)
+        track_object(p0, old_gray, mask)
     else:
         if state == 's':
             p0 = detect_object()
