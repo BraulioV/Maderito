@@ -76,6 +76,8 @@ int ping(int TriggerPin, int EchoPin) {
 }
 
 void escapar(){
+  // indicamos a la pi que el robot se mueve
+  Serial.write('m');
   cambia_velocidad(0);
   delay(20);
   girar_izquierda();
@@ -142,14 +144,22 @@ void setup() {
     pinMode(TriggerPin, OUTPUT);
     pinMode(EchoPin, INPUT);
     Serial.begin(9600); 
-    cambia_velocidad(60);
-    avanzar();
+    
+    // el robot debe estar tres segundos quieto al comenzar.
+    //indica a la pi que está quieto para que reconozca al robot enemigo
+    Serial.write('s');
+    delay(3000);
+    //cambia_velocidad(60);
+    //avanzar();
 
 }
 
 void loop() {
     // el serial debe estar disponible para comunicarse con la pi
     if (Serial.available() > 0) {
+      // leemos la dirección hacia la que se mueve el robot
+      char dir = Serial.read();
+
       // comprobamos que el robot no va a salirse de la línea negra
       reconoce_linea_negra();
 
