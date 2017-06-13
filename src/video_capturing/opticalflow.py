@@ -6,7 +6,7 @@ cap = cv2.VideoCapture(1)
 # ser = serial.Serial('dev/ttyACM0', 9600)
 
 # params for ShiTomasi corner detection
-feature_params = dict( maxCorners = 500,
+feature_params = dict( maxCorners = 50,
                        qualityLevel = 0.3,
                        minDistance = 7,
                        blockSize = 7 )
@@ -14,7 +14,7 @@ feature_params = dict( maxCorners = 500,
 # Parameters for lucas kanade optical flow
 lk_params = dict( winSize  = (15,15),
                   maxLevel = 2,
-                  criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
+                  criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.0001))
 
 # Create some random colors
 color = np.random.randint(0,255,(100,3))
@@ -27,6 +27,7 @@ mask = np.zeros_like(old_frame)
 def track_object(p0, old_gray, mask):
     ret,frame = cap.read()
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    good = True
 
     # calculate optical flow
     p1, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, p0, None, **lk_params)
@@ -47,23 +48,29 @@ def track_object(p0, old_gray, mask):
         good_new = p1[st==1]
         good_old = p0[st==1]
 
-    # draw the tracks
-    for i,(new,old) in enumerate(zip(good_new,good_old)):
-        a,b = new.ravel()
-        c,d = old.ravel()
-        mask = cv2.line(mask, (a,b),(c,d), color[i].tolist(), 2)
-        frame = cv2.circle(frame,(a,b),5,color[i].tolist(),-1)
-    
-    img = cv2.add(frame,mask)
 
-    cv2.imshow('frame',img)
-    k = cv2.waitKey(30) & 0xff
-    if k == 27:
-        return 1
+        # draw the tracks
+        for i,(new,old) in enumerate(zip(good_new,good_old)):
+            a,b = new.ravel()
+            c,d = old.ravel()
+            mask = cv2.line(mask, (a,b),(c,d), color[i].tolist(), 2)
+            frame = cv2.circle(frame,(a,b),5,color[i].tolist(),-1)
+        
+        img = cv2.add(frame,mask)
+
+        cv2.imshow('frame',img)
+        k = cv2.waitKey(30) & 0xff
+        if k == 27:
+            return 1
+
+        old_gray = frame_gray.copy()
+        p0 = good_new.reshape(-1,1,2)
+    else:
+        good = False
 
     # Now update the previous frame and previous points
-    old_gray = frame_gray.copy()
-    p0 = good_new.reshape(-1,1,2)
+    return good 
+    
     
 def detect_object():
     # Take first frame and find corners in it
@@ -77,13 +84,15 @@ p0, old_gray = detect_object()
 
 while(1):
     # state = ser.read()
-    state = 'l'
+    state = 's'
     # the robot is not moving
     if state != 'm':
-        track_object(p0, old_gray, mask)
-    else:
-        if state == 's':
-            p0 = detect_object()
+        good = track_object(p0, old_gray, mask)
+        if not good:
+            p0, old_gray = detect_object()
+
+    if state == 's':    
+        p0, old_gray = detect_object()
     
 
 cv2.destroyAllWindows()
