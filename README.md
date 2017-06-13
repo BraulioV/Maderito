@@ -38,4 +38,6 @@ Hemos establecido el siguiente "protocolo" de comunicación:
 
 * Rpi envía el carácter 'r' (_right_) a Arduino: indica que el robot debe girar a la derecha.
 
+* Rpi envía el carácter 'q' (_quiet_) a Arduino: indica que el robot está quieto.
+
 Los mensajes 's' y 'm' son necesarios porque mientras que el robot esté en movimiento, el algoritmo de visión por computador no funcionará correctamente. 
