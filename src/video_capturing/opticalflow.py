@@ -2,12 +2,12 @@ import numpy as np
 import cv2
 import serial
 
-cap = cv2.VideoCapture(1)
-# ser = serial.Serial('dev/ttyACM0', 9600)
+cap = cv2.VideoCapture(0)
+ser = serial.Serial(port='/dev/ttyACM0', baudrate=9600, timeout=0)
 
 # params for ShiTomasi corner detection
 feature_params = dict( maxCorners = 50,
-                       qualityLevel = 0.3,
+                       qualityLevel = 0.1,
                        minDistance = 7,
                        blockSize = 7 )
 
@@ -19,32 +19,37 @@ lk_params = dict( winSize  = (15,15),
 # Create some random colors
 color = np.random.randint(0,255,(100,3))
 
+n_frame = 0
 
 # Create a mask image for drawing purposes
 ret, old_frame = cap.read()
 mask = np.zeros_like(old_frame)
 
-def track_object(p0, old_gray, mask):
+def track_object(p0, old_gray, mask, n_frame):
     ret,frame = cap.read()
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     good = True
 
     # calculate optical flow
     p1, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, p0, None, **lk_params)
+    if n_frame == 9:
+        print(err.mean())
+        if err.mean() > 5: 
+            good = False
 
     diff = p0 - p1
     if diff[0,0,0] > 10:
         print("girando hacia la izquierda")
-        # ser.write('l'.encode())
+        ser.write('l'.encode())
     elif diff[0,0,0] < -10:
         print("girando hacia la derecha")
-        # ser.write('r'.encode())
+        ser.write('r'.encode())
     else:
         print("quieto")
-        # ser.write('q'.encode())
+        ser.write('q'.encode())
 
+    if good: 
     # Select good points
-    if (p1 != None and p0 != None) : 
         good_new = p1[st==1]
         good_old = p0[st==1]
 
@@ -65,8 +70,6 @@ def track_object(p0, old_gray, mask):
 
         old_gray = frame_gray.copy()
         p0 = good_new.reshape(-1,1,2)
-    else:
-        good = False
 
     # Now update the previous frame and previous points
     return good 
@@ -83,11 +86,13 @@ def detect_object():
 p0, old_gray = detect_object()
 
 while(1):
-    # state = ser.read()
-    state = 's'
+    state = ser.read()
+    # state = 's'
     # the robot is not moving
+    print("estado = ", state)
     if state != 'm':
-        good = track_object(p0, old_gray, mask)
+        good = track_object(p0, old_gray, mask, n_frame)
+        n_frame = (1 + n_frame) % 10
         if not good:
             p0, old_gray = detect_object()
 

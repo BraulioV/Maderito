@@ -13,6 +13,7 @@ const int ENB = 3;
 
 //distancia
 int pirPin = A2;
+unsigned int start = 1;
 
 //siguelinea
 bool avanza = true;
@@ -131,6 +132,7 @@ void reconoce_linea_negra() {
 }
 
 void setup() {
+    Serial.begin(9600);
     pinMode (IN1, OUTPUT);
     pinMode (IN2, OUTPUT);
     pinMode (IN3, OUTPUT);
@@ -142,19 +144,21 @@ void setup() {
     pinMode (SLA_2, INPUT);
     pinMode (SLB_2, INPUT);
     pinMode(TriggerPin, OUTPUT);
-    pinMode(EchoPin, INPUT);
-    Serial.begin(9600); 
+    pinMode(EchoPin, INPUT); 
     
     // el robot debe estar tres segundos quieto al comenzar.
     //indica a la pi que está quieto para que reconozca al robot enemigo
     Serial.write('s');
-    delay(3000);
     //cambia_velocidad(60);
     //avanzar();
 
 }
 
 void loop() {
+  if(start) {
+    delay(3000);
+    start = 0;
+  }
     // el serial debe estar disponible para comunicarse con la pi
     if (Serial.available() > 0) {
       // leemos la dirección hacia la que se mueve el robot
@@ -165,11 +169,11 @@ void loop() {
 
       // medimos distancia con el sensor de distancia
       int cm = ping(TriggerPin, EchoPin);
-      Serial.println(cm);
+      // Serial.println(cm);
       delay(200);
 
       if (cm < 15) escapar();
-      //else avanzar();
+      else Serial.write('s');
     }
 }
 
