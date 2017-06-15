@@ -13,7 +13,9 @@ const int ENB = 3;
 
 //distancia
 int pirPin = A2;
-unsigned int start = 1;
+
+// velocidad de giro
+int v_angular = 255;
 
 //siguelinea
 bool avanza = true;
@@ -27,20 +29,23 @@ int sensorValA, sensorValB,
     sensorValC, sensorValD;
 
 void avanzar(){
-    digitalWrite(IN1, LOW);
-    digitalWrite(IN2, HIGH);
-    digitalWrite(IN3, HIGH);
-    digitalWrite(IN4, LOW);
-}
-
-void retroceder(){
+    //Serial.write('m');
     digitalWrite(IN1, HIGH);
     digitalWrite(IN2, LOW);
     digitalWrite(IN3, LOW);
     digitalWrite(IN4, HIGH);
 }
 
+void retroceder(){
+    //Serial.write('m');
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, HIGH);
+    digitalWrite(IN3, HIGH);
+    digitalWrite(IN4, LOW);
+}
+
 void girar_izquierda(){
+    //Serial.write('m');
     digitalWrite(IN1, LOW);
     digitalWrite(IN2, HIGH);
     digitalWrite(IN3, LOW);
@@ -48,6 +53,7 @@ void girar_izquierda(){
 }
 
 void girar_derecha(){
+    //Serial.write('m');
     digitalWrite(IN1, HIGH);
     digitalWrite(IN2, LOW);
     digitalWrite(IN3, HIGH);
@@ -90,6 +96,7 @@ void escapar(){
   cambia_velocidad(100);
   delay(100);
   cambia_velocidad(60);
+  Serial.write('s');
 }
 
 void reconoce_linea_negra() {
@@ -107,28 +114,47 @@ void reconoce_linea_negra() {
   Serial.println("Sensor D: " + sensorValD);
   */
   
-  if( sensorValC == 0 || sensorValD == 0 ) //linea negra delante derehca
+  if( sensorValC == 0 || sensorValD == 0 ) //linea negra delante derecha
   {   
+    Serial.write('m');
     avanza = false;
     //mover maderito hacia atrás
     retroceder();
+    cambia_velocidad(255);
     delay(100);
+    cambia_velocidad(0);
+    Serial.write('s');
   }
   else if( sensorValA == 0 || sensorValB == 0 )
   {
+      Serial.write('m');
       avanza = true;
       //mover maderito hacia delante
       avanzar();
+      cambia_velocidad(255);
       delay(100);
-  } 
+      cambia_velocidad(0);
+      Serial.write('s');
+  } /*
   else {
     if (avanza){
+      Serial.write('m');
       avanzar();
+      cambia_velocidad(255);
+      delay(100);
+      cambia_velocidad(0);
+      Serial.write('s');
+      
     }
     else{
+      Serial.write('m');
       retroceder();
+      cambia_velocidad(255);
+      delay(100);
+      cambia_velocidad(0);
+      Serial.write('s');
     }
-  } 
+  } */
 }
 
 void setup() {
@@ -149,31 +175,57 @@ void setup() {
     // el robot debe estar tres segundos quieto al comenzar.
     //indica a la pi que está quieto para que reconozca al robot enemigo
     Serial.write('s');
+    delay(3000);
     //cambia_velocidad(60);
     //avanzar();
 
 }
 
 void loop() {
-  if(start) {
-    delay(3000);
-    start = 0;
-  }
     // el serial debe estar disponible para comunicarse con la pi
     if (Serial.available() > 0) {
-      // leemos la dirección hacia la que se mueve el robot
-      char dir = Serial.read();
-
-      // comprobamos que el robot no va a salirse de la línea negra
-      reconoce_linea_negra();
-
       // medimos distancia con el sensor de distancia
       int cm = ping(TriggerPin, EchoPin);
-      // Serial.println(cm);
-      delay(200);
-
-      if (cm < 15) escapar();
-      else Serial.write('s');
+      if (cm < 15) 
+        escapar();
+      
+      else{
+        // leemos la dirección hacia la que se mueve el robot
+        char dir = Serial.read();
+        //Serial.println(dir);
+        if (dir == 'r'){
+          // Serial.println("Giro a la derecha");
+          // el robot enemigo ha girado a la derecha        
+          Serial.write('m');
+          cambia_velocidad(0);
+          delay(20);
+          girar_derecha();
+          cambia_velocidad(v_angular);
+          delay(200);
+          cambia_velocidad(0);
+          Serial.write('s');
+          delay(300);
+        
+        } else if (dir == 'l') {
+          // Serial.println("Giro a la izquierda");
+          // el robot enemigo ha girado a la izquierda
+          Serial.write('m');
+          cambia_velocidad(0);
+          delay(20);
+          girar_izquierda();
+          cambia_velocidad(v_angular);
+          delay(200);
+          cambia_velocidad(0);
+          Serial.write('s');
+          delay(300);
+        } else if (dir == 'q') Serial.write('s');
+  
+        
+        // Serial.println(cm);
+        // delay(200);
+      }      
+      // comprobamos que el robot no va a salirse de la línea negra
+      //reconoce_linea_negra();
     }
 }
 
