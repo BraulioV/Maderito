@@ -14,7 +14,7 @@ ser = serial.Serial(port='/dev/ttyACM0', baudrate=9600)
 feature_params = dict( maxCorners = 50,
                        qualityLevel = 0.3,
                        minDistance = 7,
-                       blockSize = 7 )
+                       blockSize = 15 )
 
 # Parameters for lucas kanade optical flow
 lk_params = dict( winSize  = (25,25),
@@ -46,6 +46,9 @@ def track_object(p0, old_gray, mask, n_frame):
     if n_frame == 9:
         if err.mean() > 3.5: 
             good = False
+
+    if len(p1[st==1]) == 0 or len(p0[st==1]) == 0:
+        good = False
 
 
     if good: 
