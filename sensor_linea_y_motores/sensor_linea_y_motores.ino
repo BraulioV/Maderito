@@ -201,7 +201,7 @@ void loop() {
           delay(20);
           girar_derecha();
           cambia_velocidad(v_angular);
-          delay(200);
+          delay(500);
           cambia_velocidad(0);
           // Serial.write('a');
           delay(1000);
@@ -216,7 +216,7 @@ void loop() {
           delay(20);
           girar_izquierda();
           cambia_velocidad(v_angular);
-          delay(200);
+          delay(500);
           cambia_velocidad(0);
           // Serial.write('b');
           delay(1000);
