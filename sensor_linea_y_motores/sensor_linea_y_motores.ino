@@ -11,6 +11,8 @@ const int IN4 = 7;
 const int ENA = 9;
 const int ENB = 3;
 
+const int velocidad_siguelinea = 255;
+
 //distancia
 int pirPin = A2;
 
@@ -106,22 +108,16 @@ void reconoce_linea_negra() {
   sensorValC = digitalRead(SLB_2);
   sensorValD = digitalRead(SLA_2);
   
-  /*
-  //muestra por serial de los valores (0 o 1)
-  Serial.println("Sensor A: " + sensorValA);
-  Serial.println("Sensor B: " + sensorValB);
-  Serial.println("Sensor C: " + sensorValC);
-  Serial.println("Sensor D: " + sensorValD);
-  */
-  
   if( sensorValC == 0 || sensorValD == 0 ) //linea negra delante derecha
-  {   
+  {
     Serial.write('m');
     avanza = false;
+    cambia_velocidad(0);
+    delay(50);
     //mover maderito hacia atrás
     retroceder();
-    cambia_velocidad(255);
-    delay(100);
+    cambia_velocidad(velocidad_siguelinea);
+    delay(300);
     cambia_velocidad(0);
     Serial.write('s');
   }
@@ -130,13 +126,15 @@ void reconoce_linea_negra() {
       Serial.write('m');
       avanza = true;
       //mover maderito hacia delante
+      cambia_velocidad(0);
+      delay(50);
       avanzar();
-      cambia_velocidad(255);
-      delay(100);
+      cambia_velocidad(velocidad_siguelinea);
+      delay(300);
       cambia_velocidad(0);
       Serial.write('s');
   } 
-  else {
+  /*else {
     if (avanza){
       Serial.write('m');
       avanzar();
@@ -154,7 +152,7 @@ void reconoce_linea_negra() {
       cambia_velocidad(0);
       Serial.write('s');
     }
-  } 
+  } */
 }
 
 void setup() {
@@ -201,7 +199,7 @@ void loop() {
           delay(20);
           girar_derecha();
           cambia_velocidad(v_angular);
-          delay(500);
+          delay(300);
           cambia_velocidad(0);
           // Serial.write('a');
           delay(1000);
@@ -216,7 +214,7 @@ void loop() {
           delay(20);
           girar_izquierda();
           cambia_velocidad(v_angular);
-          delay(500);
+          delay(300);
           cambia_velocidad(0);
           // Serial.write('b');
           delay(1000);
@@ -236,7 +234,7 @@ void loop() {
       // Serial.write('s');
       
       // comprobamos que el robot no va a salirse de la línea negra
-      //reconoce_linea_negra();
+      // reconoce_linea_negra();
     }
 }
 
