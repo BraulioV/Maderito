@@ -59,17 +59,17 @@ def track_object(p0, old_gray, mask, n_frame):
         diff = good_new - good_old
         norm = np.sum(diff)
         if diff[0,0] > 10:
-            print("girando hacia la DERECHA")
+            # print("girando hacia la DERECHA")
             direccion = 'r'
             move = True
         elif diff[0,0] < -10:
-            print("girando hacia la IZQUIERDA")
+            # print("girando hacia la IZQUIERDA")
             
             direccion = 'l'
             move = True
         else:
             direccion = 'q'
-            print("QUIETO")
+            # print("QUIETO")
             move = False
 
         # draw the tracks
@@ -112,12 +112,12 @@ direccion = 'q';
 # move = False
 
 while(1):
-    print("----------------------------------------------------------")
+    # print("----------------------------------------------------------")
     ser.write(direccion.encode())
     state = ser.read()
 
-    print("estado = ", old_state)
-    print("nuevo estado =", state)
+    # print("estado = ", old_state)
+    # print("nuevo estado =", state)
     if state == b'm' and old_state == b's':
         # started to move
         sleep(SLEEP_TIME)
@@ -128,20 +128,15 @@ while(1):
 
     elif old_state == b'm' and state == b's':
         direccion = 'q'
-        print("Voy a detectar objetos")
+        # print("Voy a detectar objetos")
         p0, old_gray, mask, cap = detect_object(cap)
         clear_buffer()
-        # ser.write(direccion.encode())
-        # while ser.read() != b'f':
-        #     print("entro a la espera")
 
     # the robot is not moving
     elif old_state == b's' and state == b's':    
-        print("Voy a calcular la foto")
+        # print("Voy a calcular la foto")
         good, move, direccion = track_object(p0, old_gray, mask, n_frame)
         n_frame = (1 + n_frame) % 10
-
-        
 
     old_state = state 
 
