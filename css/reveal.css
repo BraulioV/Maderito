@@ -35,6 +35,19 @@ html, body, .reveal div, .reveal span, .reveal applet, .reveal object, .reveal i
 /*********************************************
  * GLOBAL STYLES
  *********************************************/
+.circular {
+  width: 200px;
+  height: 200px;
+  border-radius: 100px;
+  -webkit-border-radius: 100px;
+  -moz-border-radius: 100px;
+  background-repeat: no-repeat; 
+  background-origin:content-box;
+  background-position: center;
+  /*background-attachment: fixed;*/
+  background-size: 100% 100%; 
+}
+
 html,
 body {
   width: 100%;
