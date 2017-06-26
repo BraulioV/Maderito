@@ -55,7 +55,7 @@
                         <li>Componentes usados en el proyecto.</li>
                         <li>Código Arduino.</li>
                         <li>Código OpenCV.</li>
-                        <li>Comunicación Arduino-Raspberry Pi.</li>
+                        <li>Comunicación entre Arduino y Raspberry Pi.</li>
                         <li>Problemas que hemos tenido.</li>
                     </ul>
                 </section>
@@ -238,7 +238,77 @@ def track_object(p0, old_gray, mask, n_frame):
                     
                 </section>
                 <section>
-                    <h3>Comunicación entre Raspberry Pi y Arduino</h3>
+                    <section>
+                        <h3>Comunicación entre Raspberry Pi y Arduino</h3>
+                        <ul>
+                            <li>La comunicación se realiza mediante el puerto serie.</li>
+                            <li>En Python usamos la librería <a href="https://github.com/pyserial/pyserial"><code>pyserial</code></a>.</li>
+                            <li>En Arduino, la clase <a href="https://www.arduino.cc/en/Reference/Serial"><code>Serial</code></a>.</li>
+                            <li>Arduino envía una <b>m</b> (<i>moving</i>) o una <b>q</b> (<i>quiet</i>).</li>
+                            <li>Python envía una <b>l</b> (<i>left</i>), una <b>r</b> (<i>right</i>) o una <b>q</b> (<i>quiet</i>).</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h4>Comunicación Raspberry Pi-Arduino</h4>
+                        <pre><code class="python" data-trim contenteditable>
+import serial
+
+ser = serial.Serial(port='/dev/ttyACM0', baudrate=9600)
+direccion = 'q';
+
+while(1):
+    ser.write(direccion.encode())
+    state = ser.read()
+
+    # código de qué hacer según el estado recibido por arduino
+    # y código para dar un nuevo valor a la variable direccion
+                    </code></pre>
+                    </section>
+                    <section>
+                        <h4>Comunicación Arduino-Raspberry Pi</h4>
+
+<pre><code class="arduino" data-trim contenteditable>
+void loop() {
+    if (Serial.available() > 0) {
+        if (cm < 15)  escapar();
+        else {
+            char dir = Serial.read();
+            if (dir == 'r'){    
+              Serial.write('m');
+              // Código para girar a la derecha
+            } else if (dir == 'l') {
+              Serial.write('m');
+              // Código para girar a la izquierda
+            } else if (dir == 'q') {
+              Serial.write('s');
+              cambia_velocidad(0);
+            }
+        }
+    }
+}
+</code></pre>
+                    </section>
+                </section>
+                <section>
+                    <section>
+                        <h3>Problemas</h3>
+                        <ul>
+                            <li>Los cables hembra que teníamos no enganchaban bien con los CNY70, así que tuvimos que soldarlos.</li>
+                            <li>Los motores que teníamos no tenían mucha fuerza, tuvimos que pensar en una estrategia diferente a la de empujar.</li>
+                            <li>La Raspberry no tenía potencia suficiente como para hacer estereoscopía, tuvimos que usar sólo una cámara.</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h3>Problemas</h3>
+                        <ul>
+                            <li>Cuando comunicábamos ambas placas, teníamos que limpiar el buffer de vídeo para poder reconocer correctamente cuando se movía el contrario.</li>
+                            <li>OpenCV reconocía objetos del fondo, tuvimos que poner la cámara en alto para que el único fondo fuese el tatami.</li>
+                        </ul>
+                    </section>
+                </section>
+                <section>
+                    <h1>Fin</h1>
+                    <h4>¿Preguntas?</h4>
                 </section>
 			</div>
 		</div>
