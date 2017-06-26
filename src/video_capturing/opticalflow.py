@@ -73,18 +73,18 @@ def track_object(p0, old_gray, mask, n_frame):
             move = False
 
         # draw the tracks
-        for i,(new,old) in enumerate(zip(good_new,good_old)):
-            a,b = new.ravel()
-            # c,d = old.ravel()
-            # mask = cv2.line(mask, (a,b),(c,d), color[i].tolist(), 2)
-            frame = cv2.circle(frame,(a,b),5,color[i].tolist(),-1)
+        # for i,(new,old) in enumerate(zip(good_new,good_old)):
+        #     a,b = new.ravel()
+        #     # c,d = old.ravel()
+        #     # mask = cv2.line(mask, (a,b),(c,d), color[i].tolist(), 2)
+        #     frame = cv2.circle(frame,(a,b),5,color[i].tolist(),-1)
         
-        img = cv2.add(frame,mask)
+        # img = cv2.add(frame,mask)
 
-        cv2.imshow('frame', img)
-        k = cv2.waitKey(30) & 0xff
-        if k == 27:
-            return 1
+        # cv2.imshow('frame', img)
+        # k = cv2.waitKey(30) & 0xff
+        # if k == 27:
+        #     return 1
 
         # Now update the previous frame and previous points
         old_gray = frame_gray.copy()
