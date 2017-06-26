@@ -141,101 +141,28 @@
                 </section>
                 <section>
                     <h3>Código Arduino</h3>
-                </section>
-                <section>
-                    <section>
-                        <h3>¿Cómo ve Maderito?</h3>
-                        <h4 class="fragment">Primero por que tiene una cámara</h4>
-                    </section>
-                    <section>Ahora en serio.</section>
-                    <section>
-                        <h3>OpenCV</h3>
-                        <p>Es el pilar central de la visión en cuanto a software se refiere.</p>
-                        <h4 class="fragment">¿Cómo detecta el movimiento?</h4>
-                    </section>
-                    <section>
-                        <h3>OpticalFlow</h3>
-                        <p>El <i><b>Optical Flow</b></i> es el movimiento relativo a nuestra posición de uno o varios objetos.</p>
-                        <img src="http://www.docs.opencv.org/master/opticalflow_lk.jpg">
-                    </section>
-                    <section>
-                        <h3>¿Se puede hacer eficientemente?</h3>
-                        <h3 class="fragment">Sí</h3>
-                        <h4 class="fragment">Pero tiene sus riesgos</h4>
-                    </section>
-                    <section>
-                        <h3>Lo que ve Maderito</h3>
-                        <div style="width: 100%">
-                            <div style="width: 50%; float:left;">
-                                <img src="images/vision1.jpg">
-                            </div>
-                            <div style="width: 50%; float:right;">
-                                <img src="images/vision2.jpg">
-                            </div>
+			<ul>
+                        	<li>El código se divide en varias partes:</li>
+                        	<li>- Definición de las variables para los motores, velocidad, y sensor siguelínea</li>
+                        	<li>- Definición de los movimientos básicos de Maderito</li>
+                        	<li>- Definición de funciones especiales (reconocer enemigo, línea, escapar)</li>
+                        	<li>- Comportamiento contínuo</li>                 
+                    	</ul>
+              
+		<section>   
+			<div style="width: 33%; height: 100%; float: left">
+                            <img src="images/1_valores_arduino.jpg">
                         </div>
-                    </section>
-                    <section>
-                        <pre><code class="python" data-trim contenteditable>
-def detect_object(cam):
-    # Take first frame and find corners in it
-    cam.release()
-    cap = cv2.VideoCapture(camera)
-    ret, old_frame = cap.read()
-    old_gray = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
-    p0 = cv2.goodFeaturesToTrack(old_gray, mask = None, **feature_params)
-    mask = np.zeros_like(old_frame)
-    return p0, old_gray, mask, cap
-                        </code></pre>
-                    </section>
-                    <section>
-                        <pre><code class="python" data-trim contenteditable>
-def track_object(p0, old_gray, mask, n_frame):
-    
-    ret,frame = cap.read()
-    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    good, move, direccion = True, False, 'q'
-
-    # calculate optical flow
-    p1, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, p0, None, **lk_params)
-    if n_frame == 9:
-        if err.mean() > 3.5: 
-            good = False
-
-    if len(p1[st==1]) == 0 or len(p0[st==1]) == 0:
-        good = False
-                        </code></pre>
-                    </section>
-                    <section>
-                        <pre><code class="python" data-trim contenteditable>
-    if good: 
-    # Select good points
-        good_new = p1[st==1]
-        good_old = p0[st==1]
-
-        diff = good_new - good_old
-        norm = np.sum(diff)
-        if diff[0,0] > 10:
-            # print("girando hacia la DERECHA")
-            direccion = 'r'
-            move = True
-        elif diff[0,0] < -10:
-            # print("girando hacia la IZQUIERDA")
-            
-            direccion = 'l'
-            move = True
-        else:
-            direccion = 'q'
-            # print("QUIETO")
-            move = False
-
-    old_gray = frame_gray.copy()
-    p0 = good_new.reshape(-1,1,2)
-
-    
-    return good, move, direccion
-                        </code></pre>
-                    </section>
-                    
+                </section>
+		<section>
+                    <h3>Código Arduino</h3>
+			<div style="width: 33%; height: 100%; float: left">
+                            <img src="images/2_valores_arduino.jpg">
+                        </div>
+                </section>
+		</section>
+                <section>
+                    <h3>Código OpenCV</h3>
                 </section>
                 <section>
                     <section>
