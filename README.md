@@ -67,7 +67,7 @@ Los mensajes 's' y 'm' son necesarios porque mientras que el robot esté en movi
 2. Once the 3 seconds have passed we have two options:
     - Go to the rival with maximum power.
     - Stay still waiting for the rival to come toward us.
-    * When the rival is closer than a set distance, dodge.
+        * When the rival is closer than a set distance, dodge.
 
 At the beggining, we choosed the strategy of dodging the rival, that's why the camara will be at the lateral side of the robot.
 
