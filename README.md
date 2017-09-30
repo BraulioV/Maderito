@@ -4,7 +4,7 @@ A sumo robot for the subject ___Sistemas con Microprocesadores___ (_Microprocess
 ## Guía para los pines 
 
 ### Pines digitales
-- 3, 9: ENABLE (MOTORES) Controlan el PWM de los motores, B los de la izda y A los de la derecha
+- 3, 9: ENABLE (MOTORES) Controlan el PWM de los motores, B los de la izquierda y A los de la derecha
 - 8: echo (ultrasonidos)
 - 2: trigger (ultrasonidos)
 - pin 10: cny70 delante izquierda
@@ -26,7 +26,7 @@ A sumo robot for the subject ___Sistemas con Microprocesadores___ (_Microprocess
 En principio, optamos por la estrategia de esquivar al rival, por lo que la cámara irá en el lateral del robot.
 
 ## Comunicación Arduino-Raspberry Pi
-La comunicación entre ambas se hará mediante el puerto serial de Arduino. En Python (Raspberry Pi) hemos usado la librería `serial`.
+La comunicación entre ambas se hará mediante el puerto serie de Arduino. En Python (Raspberry Pi) hemos usado la librería `serial`.
 
 Hemos establecido el siguiente "protocolo" de comunicación:
 
