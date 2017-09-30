@@ -41,3 +41,50 @@ Hemos establecido el siguiente "protocolo" de comunicación:
 * Rpi envía el carácter 'q' (_quiet_) a Arduino: indica que el robot está quieto.
 
 Los mensajes 's' y 'm' son necesarios porque mientras que el robot esté en movimiento, el algoritmo de visión por computador no funcionará correctamente. 
+
+---
+
+# English version
+
+## Pin's Guide
+
+### Digital Pins
+
+- 3,9: ENABLE (MOTORS) Control the motors's PWM, B the left ones and A the right ones.
+- 8: echo (ultrasounds)
+- 2: trigger (ultrasounds)
+- pin 10: cny70 front-left
+- pin 11: cny70 front-right
+- pin 12: cny70 back-left
+- pin 13: cny70 back-right
+
+### Analogical Pins
+- 4, 5, 6, 7: motors
+
+## Internal Algorithm
+
+1. Because of the game's rules, stay still for 3 seconds. Measure the exact distance to the rival.
+2. Once the 3 seconds have passed we have two options:
+    - Go to the rival with maximum power.
+    - Stay still waiting for the rival to come toward us.
+        * When the rival is closer than a set distance, dodge.
+
+At the beggining, we choosed the strategy of dodging the rival, that's why the camara will be at the lateral side of the robot.
+
+## Comunication Arduino-Raspberry Pi
+
+The comunication between the Arduino and the Raspberry will be performed using the serial port of the Arduino. In Python (Raspberry pi) we have used the librarby `serial`.
+
+We have stablished the following communication's "protocol":
+
+* Arduino sends the caracter 'm' (_moving) to Rpi: indicate that the robot is moving.
+
+* Arduino sends the caracter 's' (_stopped_) to Rpi: indicate that the robot has stopped moving.
+
+* Rpi sends the caracter 'l' (_left_) to Arduino: indicate that the robot must turn to the left.
+
+* Rpi sends the caracter 'r' (_right_) to Arduino: indicate that the robot must turn to the right.
+
+* Rip sends the caracter 'q' (_quit_) to Arduino: indicate that the robot is stand still.
+
+The messages 's' and 'm' are necessary because while the robot is moving, the computer vision's algorithm doesn't work properly.
